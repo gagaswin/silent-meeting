@@ -1,4 +1,4 @@
-package com.gagaswin.silent_meeting;
+package com.gagaswin.silentmeeting;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

@@ -1,4 +1,4 @@
-package com.gagaswin.silent_meeting;
+package com.gagaswin.silentmeeting;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
