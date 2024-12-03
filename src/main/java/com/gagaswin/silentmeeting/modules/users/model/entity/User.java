@@ -1,13 +1,11 @@
 package com.gagaswin.silentmeeting.modules.users.model.entity;
 
 import com.gagaswin.silentmeeting.modules.agenda.entity.Vote;
+import com.gagaswin.silentmeeting.modules.authorization.model.entity.AuthJwtRefresh;
 import com.gagaswin.silentmeeting.modules.ideas.entity.Ideas;
 import com.gagaswin.silentmeeting.modules.participants.entity.Participant;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,6 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 @Setter
+@Builder
 @Table(name = "users")
 public class User {
   @Id
@@ -43,15 +42,11 @@ public class User {
   private LocalDateTime createdAt = LocalDateTime.now();
 
 //  RELATION
-  @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+  @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   private UserDetail userDetail;
 
-  @ManyToMany(fetch = FetchType.EAGER)
-  @JoinTable(name = "user_role",
-      joinColumns = @JoinColumn(name = "user_id"),
-      inverseJoinColumns = @JoinColumn(name = "role_id")
-  )
-  List<Role> roles;
+  @OneToMany(mappedBy = "user")
+  private List<AuthJwtRefresh> authJwtRefreshes;
 
   @OneToMany(mappedBy = "user")
   private List<Participant> participant;

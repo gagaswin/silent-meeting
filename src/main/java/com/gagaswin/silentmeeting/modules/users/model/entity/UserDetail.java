@@ -2,10 +2,7 @@ package com.gagaswin.silentmeeting.modules.users.model.entity;
 
 import com.gagaswin.silentmeeting.common.constant.ELastEducation;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
 
@@ -15,6 +12,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "user_detail")
+@Builder
 public class UserDetail {
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
@@ -29,6 +27,9 @@ public class UserDetail {
   @Column(name = "address", length = 150)
   private String address;
 
+  @Column(name = "company", length = 100)
+  private String company;
+
   @Enumerated(EnumType.STRING)
   @Column(name = "last_education")
   private ELastEducation lastEducation;
@@ -38,6 +39,6 @@ public class UserDetail {
 
 //  RELATION
   @OneToOne
-  @JoinColumn(name = "user_id", referencedColumnName = "id")
+  @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
   private User user;
 }
