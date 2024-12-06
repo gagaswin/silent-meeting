@@ -1,19 +1,31 @@
 package com.gagaswin.silentmeeting.modules.users.service;
 
+import com.gagaswin.silentmeeting.common.exceptions.UserNotFoundException;
 import com.gagaswin.silentmeeting.modules.users.model.entity.AppUser;
 import com.gagaswin.silentmeeting.modules.users.model.entity.User;
 import com.gagaswin.silentmeeting.modules.users.model.entity.UserDetail;
-import com.gagaswin.silentmeeting.modules.users.model.response.GetUserResponseDto;
+import com.gagaswin.silentmeeting.modules.users.model.request.UpdateUserProfileRequestDto;
+import com.gagaswin.silentmeeting.modules.users.model.response.UpdateUserProfileResponseDto;
+import com.gagaswin.silentmeeting.modules.users.model.response.UserResponseDto;
+import com.gagaswin.silentmeeting.modules.users.repository.UserDetailRepository;
 import com.gagaswin.silentmeeting.modules.users.repository.UserRepository;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.BeanUtils;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.beans.FeatureDescriptor;
+import java.beans.PropertyDescriptor;
+import java.time.LocalDateTime;
+import java.util.Arrays;
+
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
   private final UserRepository userRepository;
+  private final UserDetailRepository userDetailRepository;
 
   @Override
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -27,23 +39,72 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public GetUserResponseDto getUserById(String id) throws UsernameNotFoundException {
-    User user = userRepository.findByIdWithDetail(id)
-        .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+  public UserResponseDto getProfile(Authentication authentication) {
+    User user = userRepository.findByUsername(authentication.getName())
+        .orElseThrow(() -> new UsernameNotFoundException("User with username " +
+            authentication.getName() +
+            " not found"));
+    UserDetail userDetail = user.getUserDetail();
 
-    UserDetail detail = user.getUserDetail();
-
-    return GetUserResponseDto.builder()
+    return UserResponseDto.builder()
         .username(user.getUsername())
-        .firstName(user.getFirstName())
-        .lastName(user.getLastName())
-        .email(user.getEmail())
-        .phone(detail.getPhone())
-        .dateOfBirth(detail.getDateOfBirth())
-        .address(detail.getAddress())
-        .company(detail.getCompany())
-        .lastEducation(detail.getLastEducation())
-        .lastInstitutionName(detail.getLastInstitutionName())
+        .firstName(userDetail.getFirstName())
+        .lastName(userDetail.getLastName())
+        .email(userDetail.getEmail())
+        .phone(userDetail.getPhone())
+        .dateOfBirth(userDetail.getDateOfBirth())
+        .address(userDetail.getAddress())
+        .company(userDetail.getCompany())
+        .lastEducation(userDetail.getLastEducation())
+        .lastInstitutionName(userDetail.getLastInstitutionName())
+        .createdAt(user.getCreatedAt())
+        .build();
+  }
+
+  private String[] getNullPropertyName(Object source) {
+    return Arrays.stream(BeanUtils.getPropertyDescriptors(source.getClass()))
+        .map(FeatureDescriptor::getName)
+        .filter(name -> {
+          try {
+            PropertyDescriptor propertyDescriptor = BeanUtils.getPropertyDescriptor(source.getClass(), name);
+            if (propertyDescriptor != null && propertyDescriptor.getReadMethod() != null) {
+              Object value = propertyDescriptor.getReadMethod().invoke(source);
+              return value == null;
+            }
+          } catch (Exception ignored) {
+          }
+          return false;
+        })
+        .toArray(String[]::new);
+  }
+
+  @Override
+  public UpdateUserProfileResponseDto updateProfile(Authentication authentication,
+                                                    UpdateUserProfileRequestDto updateUserProfileRequestDto) {
+    User currentUser = userRepository.findByUsername(authentication.getName()) // authentication.getName() --output=username
+        .orElseThrow(() -> new UserNotFoundException(
+            "User with username " +
+                authentication.getName() +
+                " not found"));
+
+    UserDetail userDetail = currentUser.getUserDetail();
+
+    BeanUtils.copyProperties(updateUserProfileRequestDto, userDetail, getNullPropertyName(updateUserProfileRequestDto));
+    UserDetail updatedUserDetail = userDetailRepository.saveAndFlush(userDetail);
+
+    currentUser.setUpdatedAt(LocalDateTime.now());
+    User setUpdatedAt = userRepository.saveAndFlush(currentUser);
+
+    return UpdateUserProfileResponseDto.builder()
+        .firstName(updatedUserDetail.getFirstName())
+        .lastName(updatedUserDetail.getLastName())
+        .phone(updatedUserDetail.getPhone())
+        .dateOfBirth(updatedUserDetail.getDateOfBirth())
+        .address(updatedUserDetail.getAddress())
+        .company(updatedUserDetail.getCompany())
+        .lastEducation(updatedUserDetail.getLastEducation())
+        .lastInstitutionName(updatedUserDetail.getLastInstitutionName())
+        .updatedAt(setUpdatedAt.getUpdatedAt())
         .build();
   }
 }

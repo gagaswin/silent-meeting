@@ -1,4 +1,4 @@
-package com.gagaswin.silentmeeting.modules.authorization.model.response;
+package com.gagaswin.silentmeeting.modules.auth.model.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AuthResponse {
+public class AuthResponseDto {
   private String accessToken;
   private String refreshToken;
 }

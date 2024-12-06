@@ -1,12 +1,12 @@
-package com.gagaswin.silentmeeting.modules.authorization.controller;
+package com.gagaswin.silentmeeting.modules.auth.controller;
 
 import com.gagaswin.silentmeeting.common.response.CommonResponse;
 import com.gagaswin.silentmeeting.common.utils.CookieUtil;
-import com.gagaswin.silentmeeting.modules.authorization.model.request.LoginRequestDto;
-import com.gagaswin.silentmeeting.modules.authorization.model.request.RefreshTokenRequest;
-import com.gagaswin.silentmeeting.modules.authorization.model.request.RegisterRequestDto;
-import com.gagaswin.silentmeeting.modules.authorization.model.response.AuthResponse;
-import com.gagaswin.silentmeeting.modules.authorization.service.AuthService;
+import com.gagaswin.silentmeeting.modules.auth.model.request.LoginUserRequestDto;
+import com.gagaswin.silentmeeting.modules.auth.model.request.RefreshTokenRequestDto;
+import com.gagaswin.silentmeeting.modules.auth.model.request.RegisterUserRequestDto;
+import com.gagaswin.silentmeeting.modules.auth.model.response.AuthResponseDto;
+import com.gagaswin.silentmeeting.modules.auth.service.AuthService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -24,17 +24,17 @@ public class AuthController {
   private final CookieUtil cookieUtil;
 
   @PostMapping("/register")
-  public ResponseEntity<CommonResponse<AuthResponse>> registerUser(
-      @RequestBody RegisterRequestDto registerRequestDto,
+  public ResponseEntity<CommonResponse<AuthResponseDto>> registerUser(
+      @RequestBody RegisterUserRequestDto registerUserRequestDto,
       HttpServletResponse servletResponse) {
-    AuthResponse registerResponse = authService.register(registerRequestDto);
+    AuthResponseDto registerResponse = authService.register(registerUserRequestDto);
 
     cookieUtil.addCookieToResponse(servletResponse,
         cookieUtil.createCookie("accessToken", registerResponse.getAccessToken()));
     cookieUtil.addCookieToResponse(servletResponse,
         cookieUtil.createHttpOnlyCookie("refreshToken", registerResponse.getRefreshToken()));
 
-    CommonResponse<AuthResponse> response = CommonResponse.<AuthResponse>builder()
+    CommonResponse<AuthResponseDto> response = CommonResponse.<AuthResponseDto>builder()
         .statusCode(HttpStatus.CREATED.value())
         .message("Register success !!!")
         .data(registerResponse)
@@ -44,17 +44,17 @@ public class AuthController {
   }
 
   @PostMapping("/login")
-  public ResponseEntity<CommonResponse<AuthResponse>> loginUser(
-      @RequestBody LoginRequestDto loginRequestDto,
+  public ResponseEntity<CommonResponse<AuthResponseDto>> loginUser(
+      @RequestBody LoginUserRequestDto loginUserRequestDto,
       HttpServletResponse servletResponse) {
-    AuthResponse loginResponse = authService.login(loginRequestDto);
+    AuthResponseDto loginResponse = authService.login(loginUserRequestDto);
 
     cookieUtil.addCookieToResponse(servletResponse,
         cookieUtil.createCookie("accessToken", loginResponse.getAccessToken()));
     cookieUtil.addCookieToResponse(servletResponse,
         cookieUtil.createHttpOnlyCookie("refreshToken", loginResponse.getRefreshToken()));
 
-    CommonResponse<AuthResponse> response = CommonResponse.<AuthResponse>builder()
+    CommonResponse<AuthResponseDto> response = CommonResponse.<AuthResponseDto>builder()
         .statusCode(HttpStatus.OK.value())
         .message("Login success !!!")
         .data(loginResponse)
@@ -64,18 +64,18 @@ public class AuthController {
   }
 
   @PostMapping("/refresh")
-  public ResponseEntity<CommonResponse<AuthResponse>> refreshToken(
-      @RequestBody RefreshTokenRequest refreshTokenRequest,
+  public ResponseEntity<CommonResponse<AuthResponseDto>> refreshToken(
+      @RequestBody RefreshTokenRequestDto refreshTokenRequestDto,
       HttpServletResponse servletResponse) {
-    String refreshToken = refreshTokenRequest.getRefreshToken();
-    AuthResponse refreshRotationResponse = authService.refresh(refreshToken);
+    String refreshToken = refreshTokenRequestDto.getRefreshToken();
+    AuthResponseDto refreshRotationResponse = authService.refresh(refreshToken);
 
     cookieUtil.addCookieToResponse(servletResponse,
         cookieUtil.createCookie("accessToken", refreshRotationResponse.getAccessToken()));
     cookieUtil.addCookieToResponse(servletResponse,
         cookieUtil.createCookie("refreshToken", refreshRotationResponse.getRefreshToken()));
 
-    CommonResponse<AuthResponse> response = CommonResponse.<AuthResponse>builder()
+    CommonResponse<AuthResponseDto> response = CommonResponse.<AuthResponseDto>builder()
         .statusCode(HttpStatus.OK.value())
         .data(refreshRotationResponse)
         .build();

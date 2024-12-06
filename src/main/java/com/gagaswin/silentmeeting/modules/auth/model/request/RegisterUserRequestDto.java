@@ -1,4 +1,4 @@
-package com.gagaswin.silentmeeting.modules.authorization.model.request;
+package com.gagaswin.silentmeeting.modules.auth.model.request;
 
 import com.gagaswin.silentmeeting.common.constant.ELastEducation;
 import jakarta.validation.constraints.*;
@@ -11,7 +11,7 @@ import java.time.LocalDate;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class RegisterRequestDto {
+public class RegisterUserRequestDto {
   @NotBlank(message = "Username cannot be blank")
   @Size(min = 3, max = 100, message = "Username length must be at least 3 characters and a maximum of 100 characters")
   private String username;

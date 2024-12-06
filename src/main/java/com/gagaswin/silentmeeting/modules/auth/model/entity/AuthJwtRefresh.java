@@ -1,4 +1,4 @@
-package com.gagaswin.silentmeeting.modules.authorization.model.entity;
+package com.gagaswin.silentmeeting.modules.auth.model.entity;
 
 import com.gagaswin.silentmeeting.modules.users.model.entity.User;
 import jakarta.persistence.*;

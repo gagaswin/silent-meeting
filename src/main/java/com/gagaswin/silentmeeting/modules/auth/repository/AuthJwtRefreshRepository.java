@@ -1,6 +1,6 @@
-package com.gagaswin.silentmeeting.modules.authorization.repository;
+package com.gagaswin.silentmeeting.modules.auth.repository;
 
-import com.gagaswin.silentmeeting.modules.authorization.model.entity.AuthJwtRefresh;
+import com.gagaswin.silentmeeting.modules.auth.model.entity.AuthJwtRefresh;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

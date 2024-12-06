@@ -1,4 +1,4 @@
-package com.gagaswin.silentmeeting.modules.authorization.model.request;
+package com.gagaswin.silentmeeting.modules.auth.model.request;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class LoginRequestDto {
+public class LoginUserRequestDto {
   @NotBlank(message = "Username cannot be blank")
   private String username;
 

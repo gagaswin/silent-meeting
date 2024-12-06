@@ -1,15 +1,16 @@
-package com.gagaswin.silentmeeting.modules.authorization.service;
+package com.gagaswin.silentmeeting.modules.auth.service;
 
 import com.gagaswin.silentmeeting.common.exceptions.UserAlreadyExistsException;
 import com.gagaswin.silentmeeting.common.utils.JwtUtil;
-import com.gagaswin.silentmeeting.modules.authorization.model.entity.AuthJwtRefresh;
-import com.gagaswin.silentmeeting.modules.authorization.model.request.LoginRequestDto;
-import com.gagaswin.silentmeeting.modules.authorization.model.request.RegisterRequestDto;
-import com.gagaswin.silentmeeting.modules.authorization.model.response.AuthResponse;
-import com.gagaswin.silentmeeting.modules.authorization.repository.AuthJwtRefreshRepository;
+import com.gagaswin.silentmeeting.modules.auth.model.entity.AuthJwtRefresh;
+import com.gagaswin.silentmeeting.modules.auth.model.request.LoginUserRequestDto;
+import com.gagaswin.silentmeeting.modules.auth.model.request.RegisterUserRequestDto;
+import com.gagaswin.silentmeeting.modules.auth.model.response.AuthResponseDto;
+import com.gagaswin.silentmeeting.modules.auth.repository.AuthJwtRefreshRepository;
 import com.gagaswin.silentmeeting.modules.users.model.entity.AppUser;
 import com.gagaswin.silentmeeting.modules.users.model.entity.User;
 import com.gagaswin.silentmeeting.modules.users.model.entity.UserDetail;
+import com.gagaswin.silentmeeting.modules.users.repository.UserDetailRepository;
 import com.gagaswin.silentmeeting.modules.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,44 +24,42 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Date;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
   private final UserRepository userRepository;
+  private final UserDetailRepository userDetailRepository;
   private final AuthJwtRefreshRepository authJwtRefreshRepository;
   private final PasswordEncoder passwordEncoder;
   private final AuthenticationManager authenticationManager;
   private final JwtUtil jwtUtil;
 
   @Override
-  public AuthResponse register(RegisterRequestDto registerRequestDto) {
-    Optional<User> existingByUsername = userRepository.findByUsername(registerRequestDto.getUsername());
-    if (existingByUsername.isPresent()) {
-      throw new UserAlreadyExistsException("Username already exist");
+  public AuthResponseDto register(RegisterUserRequestDto registerUserRequestDto) {
+    if (userRepository.findByUsername(registerUserRequestDto.getUsername()).isPresent()) {
+      throw  new UserAlreadyExistsException("Username already exist");
     }
 
-    Optional<User> existingByEmail = userRepository.findByEmail(registerRequestDto.getEmail());
-    if (existingByEmail.isPresent()) {
+    if (userDetailRepository.findByEmail(registerUserRequestDto.getEmail()).isPresent()){
       throw new UserAlreadyExistsException("Email already exist");
     }
 
     UserDetail userDetail = UserDetail.builder()
-        .phone(registerRequestDto.getPhone())
-        .dateOfBirth(registerRequestDto.getDateOfBirth())
-        .address(registerRequestDto.getAddress())
-        .company(registerRequestDto.getCompany())
-        .lastEducation(registerRequestDto.getLastEducation())
-        .lastInstitutionName(registerRequestDto.getLastInstitutionName())
+        .firstName(registerUserRequestDto.getFirstName())
+        .lastName(registerUserRequestDto.getLastName())
+        .email(registerUserRequestDto.getEmail())
+        .phone(registerUserRequestDto.getPhone())
+        .dateOfBirth(registerUserRequestDto.getDateOfBirth())
+        .address(registerUserRequestDto.getAddress())
+        .company(registerUserRequestDto.getCompany())
+        .lastEducation(registerUserRequestDto.getLastEducation())
+        .lastInstitutionName(registerUserRequestDto.getLastInstitutionName())
         .build();
 
     User user = User.builder()
-        .username(registerRequestDto.getUsername())
-        .firstName(registerRequestDto.getFirstName())
-        .lastName(registerRequestDto.getLastName())
-        .email(registerRequestDto.getEmail())
-        .password(passwordEncoder.encode(registerRequestDto.getPassword()))
+        .username(registerUserRequestDto.getUsername())
+        .password(passwordEncoder.encode(registerUserRequestDto.getPassword()))
         .createdAt(LocalDateTime.now())
         .userDetail(userDetail)
         .build();
@@ -69,19 +68,19 @@ public class AuthServiceImpl implements AuthService {
 
     userRepository.save(user);
 
-    LoginRequestDto loginRequestDto = new LoginRequestDto(
-        registerRequestDto.getUsername(),
-        registerRequestDto.getPassword()
+    LoginUserRequestDto loginUserRequestDto = new LoginUserRequestDto(
+        registerUserRequestDto.getUsername(),
+        registerUserRequestDto.getPassword()
     );
 
-    return login(loginRequestDto);
+    return login(loginUserRequestDto);
   }
 
   @Override
-  public AuthResponse login(LoginRequestDto loginRequestDto) {
+  public AuthResponseDto login(LoginUserRequestDto loginUserRequestDto) {
     Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-        loginRequestDto.getUsername(),
-        loginRequestDto.getPassword()
+        loginUserRequestDto.getUsername(),
+        loginUserRequestDto.getPassword()
     ));
 
     SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -101,14 +100,14 @@ public class AuthServiceImpl implements AuthService {
         .build();
     authJwtRefreshRepository.save(authJwtRefresh);
 
-    return AuthResponse.builder()
+    return AuthResponseDto.builder()
         .accessToken(accessToken)
         .refreshToken(refreshToken)
         .build();
   }
 
   @Override
-  public AuthResponse refresh(String refreshToken) {
+  public AuthResponseDto refresh(String refreshToken) {
     AuthJwtRefresh authJwtRefresh = authJwtRefreshRepository.findByRefreshToken(refreshToken)
         .orElseThrow(() -> new IllegalArgumentException("Invalid refresh token"));
 
@@ -138,7 +137,7 @@ public class AuthServiceImpl implements AuthService {
         .build();
     authJwtRefreshRepository.save(newAuthJwtRefresh);
 
-    return AuthResponse.builder()
+    return AuthResponseDto.builder()
         .accessToken(newAccessToken)
         .refreshToken(newRefreshToken)
         .build();

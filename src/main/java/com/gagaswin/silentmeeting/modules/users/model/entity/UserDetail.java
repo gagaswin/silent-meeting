@@ -18,6 +18,15 @@ public class UserDetail {
   @GeneratedValue(strategy = GenerationType.UUID)
   private String id;
 
+  @Column(name = "email", nullable = false, length = 320, unique = true)
+  private String email;
+
+  @Column(name = "first_name", nullable = false, length = 100)
+  private String firstName;
+
+  @Column(name = "last_name", nullable = false, length = 100)
+  private String lastName;
+
   @Column(name = "phone", length = 15)
   private String phone;
 
