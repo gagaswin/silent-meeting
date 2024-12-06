@@ -1,7 +1,7 @@
 package com.gagaswin.silentmeeting.config.filter;
 
-import com.gagaswin.silentmeeting.common.utils.JwtUtil;
-import com.gagaswin.silentmeeting.modules.users.service.UserService;
+import com.gagaswin.silentmeeting.utils.JwtUtil;
+import com.gagaswin.silentmeeting.services.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
