@@ -36,7 +36,7 @@ public class User {
   private UserDetail userDetail;
 
   @OneToMany(mappedBy = "user")
-  private List<AuthJwtRefresh> authJwtRefreshes;
+  private List<Meeting> meetings;
 
   @OneToMany(mappedBy = "user")
   private List<Participant> participant;
@@ -46,4 +46,7 @@ public class User {
 
   @OneToMany(mappedBy = "user")
   private List<Vote> votes;
+
+  @OneToMany(mappedBy = "user")
+  private List<AuthJwtRefresh> authJwtRefreshes;
 }

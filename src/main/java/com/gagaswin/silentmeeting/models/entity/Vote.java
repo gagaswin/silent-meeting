@@ -1,5 +1,6 @@
 package com.gagaswin.silentmeeting.models.entity;
 
+import com.gagaswin.silentmeeting.enums.EParticipantVote;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,8 +18,8 @@ public class Vote {
   @GeneratedValue(strategy = GenerationType.UUID)
   private String id;
 
-  @Column(name = "vote")
-  private Boolean vote = false;
+  @Column(name = "participant_vote")
+  private EParticipantVote participantVote;
 
 //  RELATION
   @ManyToOne

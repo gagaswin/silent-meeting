@@ -1,7 +1,8 @@
-## Register
+# Register
 
-### http://localhost:8080/api/v1/auth/register 
+Endpoint: POST http://localhost:8080/api/v1/auth/register 
 
+Request Body:
 ```json
 {
   "username": "gagaswin",
@@ -18,6 +19,41 @@
 }
 ```
 
-## Login
+Response Body:
+```json
+{
+  "statusCode": 201,
+  "message": "Register success !!!",
+  "data": {
+    "accessToken": "access_token",
+    "refreshToken": "refresh_token"
+  }
+}
+```
 
-- 
+Response Body (Error):
+```json
+
+```
+
+# Login
+
+Endpoint: POST http://localhost:8080/api/v1/auth/register
+
+Request Body:
+```json
+{
+  "username": "gagaswin",
+  "password": "gagaswin123"
+}
+```
+
+Response Body:
+```json
+
+```
+
+Response Body (Error):
+```json
+
+```

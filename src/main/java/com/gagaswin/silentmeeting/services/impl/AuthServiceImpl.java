@@ -39,10 +39,10 @@ public class AuthServiceImpl implements AuthService {
   @Override
   public AuthResponseDto register(RegisterUserRequestDto registerUserRequestDto) {
     if (userRepository.findByUsername(registerUserRequestDto.getUsername()).isPresent()) {
-      throw  new UserAlreadyExistsException("Username already exist");
+      throw new UserAlreadyExistsException("Username already exist");
     }
 
-    if (userDetailRepository.findByEmail(registerUserRequestDto.getEmail()).isPresent()){
+    if (userDetailRepository.findByEmail(registerUserRequestDto.getEmail()).isPresent()) {
       throw new UserAlreadyExistsException("Email already exist");
     }
 
@@ -62,6 +62,7 @@ public class AuthServiceImpl implements AuthService {
         .username(registerUserRequestDto.getUsername())
         .password(passwordEncoder.encode(registerUserRequestDto.getPassword()))
         .createdAt(LocalDateTime.now())
+        .updatedAt(LocalDateTime.now())
         .userDetail(userDetail)
         .build();
 
