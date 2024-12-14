@@ -13,12 +13,12 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/user")
+@RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
 public class UserController {
   private final UserService userService;
 
-  @GetMapping("/profile")
+  @GetMapping
   public ResponseEntity<CommonResponseDto<UserResponseDto>> getProfile(Authentication authentication) {
     UserResponseDto user = userService.getProfile(authentication);
 
@@ -30,7 +30,7 @@ public class UserController {
     return ResponseEntity.status(HttpStatus.OK).body(userResponse);
   }
 
-  @PutMapping("/update")
+  @PutMapping
   public ResponseEntity<CommonResponseDto<UpdateUserProfileResponseDto>> update(
       Authentication authentication,
       @RequestBody @Validated UpdateUserProfileRequestDto updateUserProfileRequestDto) {

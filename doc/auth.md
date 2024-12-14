@@ -1,8 +1,15 @@
-# Register
+<h1 style="text-align: center;">
+  Auth API
+</h1>
 
-Endpoint: POST http://localhost:8080/api/v1/auth/register 
+---
 
-Request Body:
+## Register User
+
+**POST** `/api/v1/auth/register`
+
+- **Request Body:**
+
 ```json
 {
   "username": "gagaswin",
@@ -15,11 +22,12 @@ Request Body:
   "address": "jalan kemerdekaan", // optional
   "company": "SpaceX", // optional
   "lastEducation": "BACHELORS_DEGREE", // optional
-  "lastInstitutionName": "Institut Teknologi Indonesia" // optional
+  "lastInstitutionName": "Institut Teknologi Indonesia"// optional
 }
 ```
 
-Response Body:
+- **Response Body:**
+
 ```json
 {
   "statusCode": 201,
@@ -31,16 +39,18 @@ Response Body:
 }
 ```
 
-Response Body (Error):
+- **Response Body (Error):**
+
 ```json
 
 ```
 
-# Login
+## Login
 
-Endpoint: POST http://localhost:8080/api/v1/auth/register
+**POST** `/api/v1/auth/login`
 
-Request Body:
+- **Request Body:**
+
 ```json
 {
   "username": "gagaswin",
@@ -48,12 +58,52 @@ Request Body:
 }
 ```
 
-Response Body:
+- **Response Body:**
+
+```json
+{
+    "statusCode": 200,
+    "message": "Login success !!!",
+    "data": {
+        "accessToken": "accessToken",
+        "refreshToken": "refreshToken"
+    }
+}
+```
+
+- **Response Body (Error):**
+
 ```json
 
 ```
 
-Response Body (Error):
+## Refresh Token
+
+**POST** `/api/v1/auth/refresh`
+
+- **Request Body:**
+
+```json
+{
+  "refreshToken": "refreshToken"
+}
+```
+
+- **Response Body:**
+
+```json
+{
+    "statusCode": 200,
+    "message": null,
+    "data": {
+        "accessToken": "accessToken",
+        "refreshToken": "refreshToken"
+    }
+}
+```
+
+- **Response Body (Error):**
+
 ```json
 
 ```

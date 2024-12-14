@@ -14,12 +14,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1/meeting")
+@RequestMapping("/api/v1/meetings")
 @RequiredArgsConstructor
 public class MeetingController {
   private final MeetingService meetingService;
 
-  @PostMapping("/create-meeting")
+  @PostMapping
   public ResponseEntity<CommonResponseDto<CreateMeetingResponseDto>> createMeeting(
       Authentication authentication, @RequestBody CreateMeetingRequestDto createMeetingRequestDto) {
     CreateMeetingResponseDto createMeetingResponseDto = meetingService.create(authentication, createMeetingRequestDto);

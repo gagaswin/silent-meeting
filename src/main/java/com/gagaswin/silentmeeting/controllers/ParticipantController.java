@@ -15,12 +15,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1/participant")
+@RequestMapping("/api/v1/participants")
 @RequiredArgsConstructor
 public class ParticipantController {
   private final ParticipantService participantService;
 
-  @PostMapping("/join")
+  @PostMapping
   public ResponseEntity<CommonResponseDto<JoinMeetingResponseDto>> joinMeeting(
       Authentication authentication, @RequestBody JoinMeetingRequestDto joinMeetingRequestDto)
       throws BadRequestException {
