@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.beans.FeatureDescriptor;
 import java.beans.PropertyDescriptor;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 
@@ -29,7 +30,7 @@ public class UserServiceImpl implements UserService {
   private final UserDetailRepository userDetailRepository;
 
   @Override
-  public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+  public UserDetails loadUserByUsername(String username) {
     User user = userRepository.findByUsername(username)
         .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     return AppUser.builder()
@@ -88,13 +89,21 @@ public class UserServiceImpl implements UserService {
                 authentication.getName() +
                 " not found"));
 
+//    System.err.println("authentication.getName() " +authentication.getName());
+//    System.err.println("authentication.getPrincipal() " +authentication.getPrincipal());
+//    System.err.println("authentication.getClass() " +authentication.getClass());
+//    System.err.println("authentication.getAuthorities() " +authentication.getAuthorities());
+//    System.err.println("authentication.getDetails() " +authentication.getDetails());
+//    System.err.println("authentication.getCredentials() " +authentication.getCredentials());
+
     UserDetail userDetail = currentUser.getUserDetail();
 
     BeanUtils.copyProperties(updateUserProfileRequestDto, userDetail, getNullPropertyName(updateUserProfileRequestDto));
     UserDetail updatedUserDetail = userDetailRepository.saveAndFlush(userDetail);
 
+    LocalDateTime currentUpdate = LocalDateTime.now();
     currentUser.setUpdatedAt(LocalDateTime.now());
-    User setUpdatedAt = userRepository.saveAndFlush(currentUser);
+    userRepository.save(currentUser);
 
     return UpdateUserProfileResponseDto.builder()
         .firstName(updatedUserDetail.getFirstName())
@@ -105,7 +114,7 @@ public class UserServiceImpl implements UserService {
         .company(updatedUserDetail.getCompany())
         .lastEducation(updatedUserDetail.getLastEducation())
         .lastInstitutionName(updatedUserDetail.getLastInstitutionName())
-        .updatedAt(setUpdatedAt.getUpdatedAt())
+        .updatedAt(currentUpdate)
         .build();
   }
 }
