@@ -1,6 +1,5 @@
 package com.gagaswin.silentmeeting.services.impl;
 
-import com.gagaswin.silentmeeting.exceptions.UserNotFoundException;
 import com.gagaswin.silentmeeting.models.entity.AppUser;
 import com.gagaswin.silentmeeting.models.entity.User;
 import com.gagaswin.silentmeeting.models.entity.UserDetail;
@@ -19,7 +18,6 @@ import org.springframework.stereotype.Service;
 
 import java.beans.FeatureDescriptor;
 import java.beans.PropertyDescriptor;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 
@@ -41,15 +39,19 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
+  public User currentUserAuth(Authentication authentication) {
+    return userRepository.findByUsername(authentication.getName())
+        .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+  }
+
+  @Override
   public UserResponseDto getProfile(Authentication authentication) {
-    User user = userRepository.findByUsername(authentication.getName())
-        .orElseThrow(() -> new UsernameNotFoundException("User with username " +
-            authentication.getName() +
-            " not found"));
-    UserDetail userDetail = user.getUserDetail();
+    User currentUser = currentUserAuth(authentication);
+
+    UserDetail userDetail = currentUser.getUserDetail();
 
     return UserResponseDto.builder()
-        .username(user.getUsername())
+        .username(currentUser.getUsername())
         .firstName(userDetail.getFirstName())
         .lastName(userDetail.getLastName())
         .email(userDetail.getEmail())
@@ -59,7 +61,7 @@ public class UserServiceImpl implements UserService {
         .company(userDetail.getCompany())
         .lastEducation(userDetail.getLastEducation())
         .lastInstitutionName(userDetail.getLastInstitutionName())
-        .createdAt(user.getCreatedAt())
+        .createdAt(currentUser.getCreatedAt())
         .build();
   }
 
@@ -83,18 +85,7 @@ public class UserServiceImpl implements UserService {
   @Override
   public UpdateUserProfileResponseDto updateProfile(Authentication authentication,
                                                     UpdateUserProfileRequestDto updateUserProfileRequestDto) {
-    User currentUser = userRepository.findByUsername(authentication.getName()) // authentication.getName() --output=username
-        .orElseThrow(() -> new UserNotFoundException(
-            "User with username " +
-                authentication.getName() +
-                " not found"));
-
-//    System.err.println("authentication.getName() " +authentication.getName());
-//    System.err.println("authentication.getPrincipal() " +authentication.getPrincipal());
-//    System.err.println("authentication.getClass() " +authentication.getClass());
-//    System.err.println("authentication.getAuthorities() " +authentication.getAuthorities());
-//    System.err.println("authentication.getDetails() " +authentication.getDetails());
-//    System.err.println("authentication.getCredentials() " +authentication.getCredentials());
+    User currentUser = currentUserAuth(authentication);
 
     UserDetail userDetail = currentUser.getUserDetail();
 

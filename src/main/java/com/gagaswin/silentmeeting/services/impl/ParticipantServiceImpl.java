@@ -1,16 +1,15 @@
 package com.gagaswin.silentmeeting.services.impl;
 
 import com.gagaswin.silentmeeting.exceptions.MeetingNotFoundException;
-import com.gagaswin.silentmeeting.exceptions.UserNotFoundException;
 import com.gagaswin.silentmeeting.models.dtos.participants.JoinMeetingRequestDto;
 import com.gagaswin.silentmeeting.models.dtos.participants.JoinMeetingResponseDto;
 import com.gagaswin.silentmeeting.models.entity.Meeting;
 import com.gagaswin.silentmeeting.models.entity.Participant;
 import com.gagaswin.silentmeeting.models.entity.User;
-import com.gagaswin.silentmeeting.repository.MeetingRepository;
 import com.gagaswin.silentmeeting.repository.ParticipantRepository;
-import com.gagaswin.silentmeeting.repository.UserRepository;
+import com.gagaswin.silentmeeting.services.MeetingService;
 import com.gagaswin.silentmeeting.services.ParticipantService;
+import com.gagaswin.silentmeeting.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
 import org.springframework.security.core.Authentication;
@@ -23,18 +22,16 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class ParticipantServiceImpl implements ParticipantService {
   private final ParticipantRepository participantRepository;
-  private final UserRepository userRepository;
-  private final MeetingRepository meetingRepository;
+  private final UserService userService;
+  private final MeetingService meetingService;
   private final PasswordEncoder passwordEncoder;
 
   @Override
   public JoinMeetingResponseDto joinMeeting(Authentication authentication,
                                             JoinMeetingRequestDto joinMeetingRequestDto) throws BadRequestException {
-    User currentUser = userRepository.findByUsername(authentication.getName())
-        .orElseThrow(() -> new UserNotFoundException("User not valid"));
+    User currentUser = userService.currentUserAuth(authentication);
 
-    Meeting currentMeeting = meetingRepository.findById(joinMeetingRequestDto.getMeetingId())
-        .orElseThrow(() -> new MeetingNotFoundException("Meeting not found"));
+    Meeting currentMeeting = meetingService.getMeetingById(joinMeetingRequestDto.getMeetingId());
 
     if (!passwordEncoder.matches(joinMeetingRequestDto.getMeetingPassword(), currentMeeting.getPassword())) {
       throw new MeetingNotFoundException("Meeting not found");
