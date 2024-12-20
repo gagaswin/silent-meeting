@@ -1,5 +1,6 @@
 package com.gagaswin.silentmeeting.handler;
 
+import com.gagaswin.silentmeeting.exceptions.AgendaNotFoundException;
 import com.gagaswin.silentmeeting.exceptions.MeetingNotFoundException;
 import com.gagaswin.silentmeeting.exceptions.UserAlreadyExistsException;
 import com.gagaswin.silentmeeting.exceptions.UserNotFoundException;
@@ -41,5 +42,11 @@ public class GlobalExceptionHandler {
   public ResponseEntity<CommonResponseDto<String>> handleBadRequestException(BadRequestException e) {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
         .body(this.response(HttpStatus.BAD_REQUEST.value(), e.getMessage()));
+  }
+
+  @ExceptionHandler(exception = AgendaNotFoundException.class)
+  public ResponseEntity<CommonResponseDto<String>> handleAgendaNotFoundException(AgendaNotFoundException e) {
+    return ResponseEntity.status(HttpStatus.NOT_FOUND)
+        .body(this.response(HttpStatus.NOT_FOUND.value(), e.getMessage()));
   }
 }
