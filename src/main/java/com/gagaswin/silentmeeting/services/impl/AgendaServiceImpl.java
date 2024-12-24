@@ -1,6 +1,6 @@
 package com.gagaswin.silentmeeting.services.impl;
 
-import com.gagaswin.silentmeeting.exceptions.AgendaNotFoundException;
+import com.gagaswin.silentmeeting.exceptions.ResourceNotFoundException;
 import com.gagaswin.silentmeeting.models.dtos.agenda.AgendaResponseDto;
 import com.gagaswin.silentmeeting.models.dtos.agenda.CreateAgendaRequestDto;
 import com.gagaswin.silentmeeting.models.entity.Agenda;
@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -29,7 +28,7 @@ public class AgendaServiceImpl implements AgendaService {
   @Override
   public Agenda getAgendaById(String id) {
     return agendaRepository.findById(id)
-        .orElseThrow(() -> new AgendaNotFoundException("Agenda not found"));
+        .orElseThrow(() -> new ResourceNotFoundException("Agenda", "Id", id));
   }
 
   @Override
@@ -40,7 +39,7 @@ public class AgendaServiceImpl implements AgendaService {
     Meeting currentMeeting = meetingService.getMeetingById(meetingId);
 
     if (!currentUser.getId().equals(currentMeeting.getUser().getId())) {
-      throw new BadRequestException("You are not a host");
+      throw new BadRequestException("You are not the host");
     }
 
     LocalDateTime currentTime = LocalDateTime.now();
@@ -66,7 +65,6 @@ public class AgendaServiceImpl implements AgendaService {
     Meeting currentMeeting = meetingService.getMeetingById(meetingId);
 
     boolean isCreator = currentMeeting.getUser().getId().equals(currentUser.getId());
-
     boolean isParticipant = currentMeeting.getParticipants().stream()
         .anyMatch(participant -> participant.getUser().getId().equals(currentUser.getId()));
 
@@ -88,7 +86,6 @@ public class AgendaServiceImpl implements AgendaService {
     Meeting currentMeeting = meetingService.getMeetingById(meetingId);
 
     boolean isCreator = currentMeeting.getUser().getId().equals(currentUser.getId());
-
     boolean isParticipant = currentMeeting.getParticipants().stream()
         .anyMatch(participant -> participant.getUser().getId().equals(currentUser.getId()));
 

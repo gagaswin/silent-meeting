@@ -1,6 +1,5 @@
 package com.gagaswin.silentmeeting.controllers;
 
-import com.gagaswin.silentmeeting.exceptions.AgendaNotFoundException;
 import com.gagaswin.silentmeeting.models.dtos.CommonResponseDto;
 import com.gagaswin.silentmeeting.models.dtos.agenda.AgendaResponseDto;
 import com.gagaswin.silentmeeting.models.dtos.agenda.CreateAgendaRequestDto;

@@ -1,6 +1,6 @@
 package com.gagaswin.silentmeeting.services.impl;
 
-import com.gagaswin.silentmeeting.exceptions.MeetingNotFoundException;
+import com.gagaswin.silentmeeting.exceptions.ResourceNotFoundException;
 import com.gagaswin.silentmeeting.models.dtos.agenda.AgendaDto;
 import com.gagaswin.silentmeeting.models.dtos.meetings.CreateMeetingRequestDto;
 import com.gagaswin.silentmeeting.models.dtos.meetings.CreateMeetingResponseDto;
@@ -20,7 +20,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.nio.file.AccessDeniedException;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -36,7 +35,7 @@ public class MeetingServiceImpl implements MeetingService {
   @Override
   public Meeting getMeetingById(String id) {
     return meetingRepository.findById(id)
-        .orElseThrow(() -> new MeetingNotFoundException("Meeting not found"));
+        .orElseThrow(() -> new ResourceNotFoundException("Meeting", "Id", id));
   }
 
   @Override

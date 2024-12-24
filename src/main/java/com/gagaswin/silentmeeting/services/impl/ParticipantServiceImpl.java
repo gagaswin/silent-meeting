@@ -1,6 +1,6 @@
 package com.gagaswin.silentmeeting.services.impl;
 
-import com.gagaswin.silentmeeting.exceptions.MeetingNotFoundException;
+import com.gagaswin.silentmeeting.exceptions.ResourceNotFoundException;
 import com.gagaswin.silentmeeting.models.dtos.participants.JoinMeetingRequestDto;
 import com.gagaswin.silentmeeting.models.dtos.participants.JoinMeetingResponseDto;
 import com.gagaswin.silentmeeting.models.entity.Meeting;
@@ -34,7 +34,7 @@ public class ParticipantServiceImpl implements ParticipantService {
     Meeting currentMeeting = meetingService.getMeetingById(joinMeetingRequestDto.getMeetingId());
 
     if (!passwordEncoder.matches(joinMeetingRequestDto.getMeetingPassword(), currentMeeting.getPassword())) {
-      throw new MeetingNotFoundException("Meeting not found");
+      throw new ResourceNotFoundException("Meeting", "Id or Password", "id or password wrong");
     } else if (currentUser.equals(currentMeeting.getUser())) {
       throw new BadRequestException("You are the host at this meeting bro");
     }
