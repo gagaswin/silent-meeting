@@ -1,5 +1,6 @@
 package com.gagaswin.silentmeeting.services.impl;
 
+import com.gagaswin.silentmeeting.exceptions.InvalidRefreshTokenException;
 import com.gagaswin.silentmeeting.exceptions.UserAlreadyExistsException;
 import com.gagaswin.silentmeeting.services.AuthService;
 import com.gagaswin.silentmeeting.utils.JwtUtil;
@@ -15,6 +16,7 @@ import com.gagaswin.silentmeeting.repository.UserDetailRepository;
 import com.gagaswin.silentmeeting.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -39,11 +41,11 @@ public class AuthServiceImpl implements AuthService {
   @Override
   public AuthResponseDto register(RegisterUserRequestDto registerUserRequestDto) {
     if (userRepository.findByUsername(registerUserRequestDto.getUsername()).isPresent()) {
-      throw new UserAlreadyExistsException("Username already exist");
+      throw new UserAlreadyExistsException("Username", registerUserRequestDto.getUsername());
     }
 
     if (userDetailRepository.findByEmail(registerUserRequestDto.getEmail()).isPresent()) {
-      throw new UserAlreadyExistsException("Email already exist");
+      throw new UserAlreadyExistsException("Email", registerUserRequestDto.getEmail());
     }
 
     UserDetail userDetail = UserDetail.builder()
@@ -89,7 +91,7 @@ public class AuthServiceImpl implements AuthService {
 
     AppUser appUser = (AppUser) authentication.getPrincipal();
     User user = userRepository.findByUsername(appUser.getUsername())
-        .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        .orElseThrow(() -> new UsernameNotFoundException("User not found: org.springframework.security.core.userdetails.UsernameNotFoundException"));
 
     String accessToken = jwtUtil.generateToken(appUser);
     String refreshToken = jwtUtil.generateRefreshToken(appUser);
@@ -111,10 +113,10 @@ public class AuthServiceImpl implements AuthService {
   @Override
   public AuthResponseDto refresh(String refreshToken) {
     AuthJwtRefresh authJwtRefresh = authJwtRefreshRepository.findByRefreshToken(refreshToken)
-        .orElseThrow(() -> new IllegalArgumentException("Invalid refresh token"));
+        .orElseThrow(() -> new InvalidRefreshTokenException("Invalid refresh token"));
 
     if (authJwtRefresh.isRevoked() || authJwtRefresh.getExpiresAt().before(Date.from(Instant.now()))) {
-      throw new IllegalArgumentException("Refresh token is expired or revoke");
+      throw new CredentialsExpiredException("Refresh token is expired or revoke");
     }
 
     User user = authJwtRefresh.getUser();

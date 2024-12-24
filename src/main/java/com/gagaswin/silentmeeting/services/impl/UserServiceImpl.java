@@ -1,5 +1,6 @@
 package com.gagaswin.silentmeeting.services.impl;
 
+import com.gagaswin.silentmeeting.exceptions.ResourceNotFoundException;
 import com.gagaswin.silentmeeting.models.entity.AppUser;
 import com.gagaswin.silentmeeting.models.entity.User;
 import com.gagaswin.silentmeeting.models.entity.UserDetail;
@@ -30,7 +31,7 @@ public class UserServiceImpl implements UserService {
   @Override
   public UserDetails loadUserByUsername(String username) {
     User user = userRepository.findByUsername(username)
-        .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        .orElseThrow(() -> new UsernameNotFoundException("User not found: org.springframework.security.core.userdetails.UsernameNotFoundException"));
     return AppUser.builder()
         .id(user.getId())
         .username(user.getUsername())
@@ -41,7 +42,7 @@ public class UserServiceImpl implements UserService {
   @Override
   public User currentUserAuth(Authentication authentication) {
     return userRepository.findByUsername(authentication.getName())
-        .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        .orElseThrow(() -> new ResourceNotFoundException("User", "Username", authentication.getName()));
   }
 
   @Override
@@ -86,7 +87,6 @@ public class UserServiceImpl implements UserService {
   public UpdateUserProfileResponseDto updateProfile(Authentication authentication,
                                                     UpdateUserProfileRequestDto updateUserProfileRequestDto) {
     User currentUser = currentUserAuth(authentication);
-
     UserDetail userDetail = currentUser.getUserDetail();
 
     BeanUtils.copyProperties(updateUserProfileRequestDto, userDetail, getNullPropertyName(updateUserProfileRequestDto));
