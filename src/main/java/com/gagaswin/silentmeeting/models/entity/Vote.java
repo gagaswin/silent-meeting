@@ -23,8 +23,8 @@ public class Vote {
 
 //  RELATION
   @ManyToOne
-  @JoinColumn(name = "user_id")
-  private User user;
+  @JoinColumn(name = "participant_id")
+  private Participant participant;
 
   @ManyToOne
   @JoinColumn(name = "agenda_id")

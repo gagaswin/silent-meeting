@@ -40,14 +40,14 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public User currentUserAuth(Authentication authentication) {
+  public User getCurrentUser(Authentication authentication) {
     return userRepository.findByUsername(authentication.getName())
         .orElseThrow(() -> new ResourceNotFoundException("User", "Username", authentication.getName()));
   }
 
   @Override
   public UserResponseDto getProfile(Authentication authentication) {
-    User currentUser = currentUserAuth(authentication);
+    User currentUser = getCurrentUser(authentication);
 
     UserDetail userDetail = currentUser.getUserDetail();
 
@@ -86,7 +86,7 @@ public class UserServiceImpl implements UserService {
   @Override
   public UpdateUserProfileResponseDto updateProfile(Authentication authentication,
                                                     UpdateUserProfileRequestDto updateUserProfileRequestDto) {
-    User currentUser = currentUserAuth(authentication);
+    User currentUser = getCurrentUser(authentication);
     UserDetail userDetail = currentUser.getUserDetail();
 
     BeanUtils.copyProperties(updateUserProfileRequestDto, userDetail, getNullPropertyName(updateUserProfileRequestDto));

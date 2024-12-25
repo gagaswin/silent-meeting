@@ -26,7 +26,7 @@ public class AgendaServiceImpl implements AgendaService {
   private final MeetingService meetingService;
 
   @Override
-  public Agenda getAgendaById(String id) {
+  public Agenda getCurrentAgenda(String id) {
     return agendaRepository.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("Agenda", "Id", id));
   }
@@ -35,11 +35,11 @@ public class AgendaServiceImpl implements AgendaService {
   public AgendaResponseDto create(Authentication authentication,
                                   String meetingId,
                                   CreateAgendaRequestDto createAgendaRequestDto) throws BadRequestException {
-    User currentUser = userService.currentUserAuth(authentication);
-    Meeting currentMeeting = meetingService.getMeetingById(meetingId);
+    User currentUser = userService.getCurrentUser(authentication);
+    Meeting currentMeeting = meetingService.getCurrentMeeting(meetingId);
 
     if (!currentUser.getId().equals(currentMeeting.getUser().getId())) {
-      throw new BadRequestException("You are not the host");
+      throw new BadRequestException("You are not the host!");
     }
 
     LocalDateTime currentTime = LocalDateTime.now();
@@ -61,8 +61,8 @@ public class AgendaServiceImpl implements AgendaService {
 
   @Override
   public List<AgendaResponseDto> getAll(Authentication authentication, String meetingId) throws BadRequestException {
-    User currentUser = userService.currentUserAuth(authentication);
-    Meeting currentMeeting = meetingService.getMeetingById(meetingId);
+    User currentUser = userService.getCurrentUser(authentication);
+    Meeting currentMeeting = meetingService.getCurrentMeeting(meetingId);
 
     boolean isCreator = currentMeeting.getUser().getId().equals(currentUser.getId());
     boolean isParticipant = currentMeeting.getParticipants().stream()
@@ -82,8 +82,8 @@ public class AgendaServiceImpl implements AgendaService {
 
   @Override
   public AgendaResponseDto get(Authentication authentication, String meetingId, String agendaId) throws BadRequestException {
-    User currentUser = userService.currentUserAuth(authentication);
-    Meeting currentMeeting = meetingService.getMeetingById(meetingId);
+    User currentUser = userService.getCurrentUser(authentication);
+    Meeting currentMeeting = meetingService.getCurrentMeeting(meetingId);
 
     boolean isCreator = currentMeeting.getUser().getId().equals(currentUser.getId());
     boolean isParticipant = currentMeeting.getParticipants().stream()
@@ -91,7 +91,7 @@ public class AgendaServiceImpl implements AgendaService {
 
     if (!isCreator && !isParticipant) throw new BadRequestException("User is not part of this meeting");
 
-    Agenda currentAgenda = this.getAgendaById(agendaId);
+    Agenda currentAgenda = this.getCurrentAgenda(agendaId);
 
     return AgendaResponseDto.builder()
         .title(currentAgenda.getTitle())
