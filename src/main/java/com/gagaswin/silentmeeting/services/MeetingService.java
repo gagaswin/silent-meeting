@@ -8,7 +8,7 @@ import org.apache.coyote.BadRequestException;
 import org.springframework.security.core.Authentication;
 
 public interface MeetingService {
-  Meeting getMeetingById(String id);
+  Meeting getCurrentMeeting(String id);
 
   CreateMeetingResponseDto create(Authentication authentication, CreateMeetingRequestDto createMeetingRequestDto);
 

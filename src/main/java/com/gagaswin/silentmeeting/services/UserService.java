@@ -8,7 +8,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 public interface UserService extends UserDetailsService {
-  User currentUserAuth(Authentication authentication);
+  User getCurrentUser(Authentication authentication);
 
   UserResponseDto getProfile(Authentication authentication);
 

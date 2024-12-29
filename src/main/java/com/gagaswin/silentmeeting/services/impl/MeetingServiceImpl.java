@@ -33,15 +33,14 @@ public class MeetingServiceImpl implements MeetingService {
   private final PasswordEncoder passwordEncoder;
 
   @Override
-  public Meeting getMeetingById(String id) {
+  public Meeting getCurrentMeeting(String id) {
     return meetingRepository.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("Meeting", "Id", id));
   }
 
   @Override
-  public CreateMeetingResponseDto create(Authentication authentication,
-                                         CreateMeetingRequestDto createMeetingRequestDto) {
-    User currentUser = userService.currentUserAuth(authentication);
+  public CreateMeetingResponseDto create(Authentication authentication, CreateMeetingRequestDto createMeetingRequestDto) {
+    User currentUser = userService.getCurrentUser(authentication);
 
     String generateRandomPassword = RandomStringUtils
         .random(12, 48, 122, true, true, null, new SecureRandom());
@@ -77,10 +76,10 @@ public class MeetingServiceImpl implements MeetingService {
 
   @Override
   public MeetingResponseDto get(Authentication authentication, String meetingId) throws BadRequestException {
-    User currentUser = userService.currentUserAuth(authentication);
-    Meeting currentMeeting = getMeetingById(meetingId);
-    boolean isCreator = currentMeeting.getUser().getId().equals(currentUser.getId());
+    User currentUser = userService.getCurrentUser(authentication);
+    Meeting currentMeeting = this.getCurrentMeeting(meetingId);
 
+    boolean isCreator = currentMeeting.getUser().getId().equals(currentUser.getId());
     boolean isParticipant = currentMeeting.getParticipants().stream()
         .anyMatch(participant -> participant.getUser().getId().equals(currentUser.getId()));
 

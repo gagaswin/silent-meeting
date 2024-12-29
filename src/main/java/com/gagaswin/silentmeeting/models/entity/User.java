@@ -41,11 +41,11 @@ public class User {
   @OneToMany(mappedBy = "user")
   private List<Participant> participant;
 
-  @OneToMany(mappedBy = "user")
-  private List<Ideas> ideas;
+//  @OneToMany(mappedBy = "user")
+//  private List<Ideas> ideas;
 
-  @OneToMany(mappedBy = "user")
-  private List<Vote> votes;
+//  @OneToMany(mappedBy = "user")
+//  private List<Vote> votes;
 
   @OneToMany(mappedBy = "user")
   private List<AuthJwtRefresh> authJwtRefreshes;

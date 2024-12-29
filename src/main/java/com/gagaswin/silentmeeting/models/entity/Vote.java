@@ -2,12 +2,10 @@ package com.gagaswin.silentmeeting.models.entity;
 
 import com.gagaswin.silentmeeting.enums.EParticipantVote;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
+@Builder
 @Getter
 @Setter
 @NoArgsConstructor
@@ -18,13 +16,14 @@ public class Vote {
   @GeneratedValue(strategy = GenerationType.UUID)
   private String id;
 
+  @Enumerated(EnumType.STRING)
   @Column(name = "participant_vote")
   private EParticipantVote participantVote;
 
 //  RELATION
   @ManyToOne
-  @JoinColumn(name = "user_id")
-  private User user;
+  @JoinColumn(name = "participant_id")
+  private Participant participant;
 
   @ManyToOne
   @JoinColumn(name = "agenda_id")

@@ -1,16 +1,14 @@
 package com.gagaswin.silentmeeting.models.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "ideas")
@@ -27,8 +25,8 @@ public class Ideas {
 
 //  RELATION
   @ManyToOne
-  @JoinColumn(name = "user_id", nullable = false)
-  private User user;
+  @JoinColumn(name = "participant_id", nullable = false)
+  private Participant participant;
 
   @ManyToOne
   @JoinColumn(name = "agenda_id", nullable = false)
