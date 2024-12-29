@@ -3,8 +3,10 @@ package com.gagaswin.silentmeeting.controllers;
 import com.gagaswin.silentmeeting.models.dtos.CommonResponseDto;
 import com.gagaswin.silentmeeting.models.dtos.ideas.CreateIdeaRequestDto;
 import com.gagaswin.silentmeeting.models.dtos.ideas.IdeaResponseDto;
+import com.gagaswin.silentmeeting.models.dtos.participants.CreateVoteRequestDto;
 import com.gagaswin.silentmeeting.models.dtos.participants.JoinMeetingRequestDto;
 import com.gagaswin.silentmeeting.models.dtos.participants.JoinMeetingResponseDto;
+import com.gagaswin.silentmeeting.models.dtos.participants.VoteResponseDto;
 import com.gagaswin.silentmeeting.services.ParticipantService;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
@@ -20,9 +22,8 @@ public class ParticipantController {
   private final ParticipantService participantService;
 
   @PostMapping
-  public ResponseEntity<CommonResponseDto<JoinMeetingResponseDto>> joinMeeting(
-      Authentication authentication, @RequestBody JoinMeetingRequestDto joinMeetingRequestDto)
-      throws BadRequestException {
+  public ResponseEntity<CommonResponseDto<JoinMeetingResponseDto>> joinMeeting(Authentication authentication,
+                                                                               @RequestBody JoinMeetingRequestDto joinMeetingRequestDto) throws BadRequestException {
     JoinMeetingResponseDto joinMeeting = participantService.joinMeeting(authentication, joinMeetingRequestDto);
 
     CommonResponseDto<JoinMeetingResponseDto> response = CommonResponseDto.<JoinMeetingResponseDto>builder()
@@ -44,5 +45,26 @@ public class ParticipantController {
         .data(ideaContent)
         .build();
     return ResponseEntity.status(HttpStatus.CREATED).body(response);
+  }
+
+  @PostMapping("meetings/{meetingId}/agenda/{agendaId}/votes")
+  public ResponseEntity<CommonResponseDto<VoteResponseDto>> createAgendaVote(Authentication authentication,
+                                                                             @PathVariable String meetingId,
+                                                                             @PathVariable String agendaId,
+                                                                             @RequestBody CreateVoteRequestDto createVoteRequestDto) throws BadRequestException {
+    VoteResponseDto agendaVote = participantService.createAgendaVote(authentication, meetingId, agendaId, createVoteRequestDto);
+
+    HttpStatus httpStatus;
+    if (agendaVote.isNewVote()) {
+      httpStatus = HttpStatus.CREATED;
+    } else {
+      httpStatus = HttpStatus.OK;
+    }
+
+    CommonResponseDto<VoteResponseDto> response = CommonResponseDto.<VoteResponseDto>builder()
+        .statusCode(httpStatus.value())
+        .data(agendaVote)
+        .build();
+    return ResponseEntity.status(httpStatus).body(response);
   }
 }

@@ -3,8 +3,8 @@ package com.gagaswin.silentmeeting.enums;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-@AllArgsConstructor
 @Getter
+@AllArgsConstructor
 public enum ELastEducation {
   PRIMARY_SCHOOL("Primary School"),
   MIDDLE_SCHOOL("Middle School / Junior High School"),
@@ -19,3 +19,4 @@ public enum ELastEducation {
 
   private final String displayName;
 }
+

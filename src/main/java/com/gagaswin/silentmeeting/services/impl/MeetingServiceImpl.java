@@ -39,8 +39,7 @@ public class MeetingServiceImpl implements MeetingService {
   }
 
   @Override
-  public CreateMeetingResponseDto create(Authentication authentication,
-                                         CreateMeetingRequestDto createMeetingRequestDto) {
+  public CreateMeetingResponseDto create(Authentication authentication, CreateMeetingRequestDto createMeetingRequestDto) {
     User currentUser = userService.getCurrentUser(authentication);
 
     String generateRandomPassword = RandomStringUtils
