@@ -24,9 +24,8 @@ public class AuthController {
   private final CookieUtil cookieUtil;
 
   @PostMapping("/register")
-  public ResponseEntity<CommonResponseDto<AuthResponseDto>> registerUser(
-      @RequestBody RegisterUserRequestDto registerUserRequestDto,
-      HttpServletResponse servletResponse) {
+  public ResponseEntity<CommonResponseDto<AuthResponseDto>> registerUser(HttpServletResponse servletResponse,
+                                                                         @RequestBody RegisterUserRequestDto registerUserRequestDto) {
     AuthResponseDto registerResponse = authService.register(registerUserRequestDto);
 
     cookieUtil.addCookieToResponse(servletResponse,
@@ -44,9 +43,8 @@ public class AuthController {
   }
 
   @PostMapping("/login")
-  public ResponseEntity<CommonResponseDto<AuthResponseDto>> loginUser(
-      @RequestBody LoginUserRequestDto loginUserRequestDto,
-      HttpServletResponse servletResponse) {
+  public ResponseEntity<CommonResponseDto<AuthResponseDto>> loginUser(HttpServletResponse servletResponse,
+                                                                      @RequestBody LoginUserRequestDto loginUserRequestDto) {
     AuthResponseDto loginResponse = authService.login(loginUserRequestDto);
 
     cookieUtil.addCookieToResponse(servletResponse,
@@ -64,9 +62,8 @@ public class AuthController {
   }
 
   @PostMapping("/refresh")
-  public ResponseEntity<CommonResponseDto<AuthResponseDto>> refreshToken(
-      @RequestBody RefreshTokenRequestDto refreshTokenRequestDto,
-      HttpServletResponse servletResponse) {
+  public ResponseEntity<CommonResponseDto<AuthResponseDto>> refreshToken(HttpServletResponse servletResponse,
+                                                                         @RequestBody RefreshTokenRequestDto refreshTokenRequestDto) {
     String refreshToken = refreshTokenRequestDto.getRefreshToken();
     AuthResponseDto refreshRotationResponse = authService.refresh(refreshToken);
 
@@ -77,6 +74,7 @@ public class AuthController {
 
     CommonResponseDto<AuthResponseDto> response = CommonResponseDto.<AuthResponseDto>builder()
         .statusCode(HttpStatus.OK.value())
+        .message("Refresh success !!!")
         .data(refreshRotationResponse)
         .build();
 

@@ -83,7 +83,7 @@ public class JwtUtil {
     return decodedToken(refreshToken, jwtRefreshSecret).getExpiresAt();
   }
 
-  public Boolean verifyJwt(String accessToken, String currentUserId, String currentUsername) throws JWTVerificationException {
+  public void verifyJwt(String accessToken, String currentUserId, String currentUsername) {
     DecodedJWT decodedJWT = decodedToken(accessToken, jwtSecret);
 
     if (decodedJWT.getExpiresAt().before(new Date())) {
@@ -101,12 +101,9 @@ public class JwtUtil {
     if (!claimDecode.equals(currentUsername)) {
       throw new JWTVerificationException("Token claim does not match with current user information");
     }
-
-    return true;
   }
 
-  public Boolean verifyJwtRefresh(String refreshToken, String currentUserId, String currentUsername)
-      throws JWTVerificationException {
+  public void verifyJwtRefresh(String refreshToken, String currentUserId, String currentUsername) {
     DecodedJWT decodedJWT = decodedToken(refreshToken, jwtRefreshSecret);
 
     if (decodedJWT.getExpiresAt().before(new Date())) {
@@ -124,7 +121,5 @@ public class JwtUtil {
     if (!claimDecode.equals((currentUsername))) {
       throw new JWTVerificationException("Refresh token claim does not match with current user information");
     }
-
-    return true;
   }
 }

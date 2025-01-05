@@ -82,14 +82,16 @@ public class AuthServiceImpl implements AuthService {
 
   @Override
   public AuthResponseDto login(LoginUserRequestDto loginUserRequestDto) {
-    Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-        loginUserRequestDto.getUsername(),
-        loginUserRequestDto.getPassword()
-    ));
-
+    Authentication authentication = authenticationManager.authenticate(
+        new UsernamePasswordAuthenticationToken(
+            loginUserRequestDto.getUsername(),
+            loginUserRequestDto.getPassword()
+        )
+    );
     SecurityContextHolder.getContext().setAuthentication(authentication);
 
     AppUser appUser = (AppUser) authentication.getPrincipal();
+
     User user = userRepository.findByUsername(appUser.getUsername())
         .orElseThrow(() -> new UsernameNotFoundException("User not found: org.springframework.security.core.userdetails.UsernameNotFoundException"));
 
