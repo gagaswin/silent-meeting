@@ -3,6 +3,9 @@ package com.gagaswin.silentmeeting.services.impl;
 import com.gagaswin.silentmeeting.exceptions.ResourceNotFoundException;
 import com.gagaswin.silentmeeting.models.dtos.agenda.AgendaResponseDto;
 import com.gagaswin.silentmeeting.models.dtos.agenda.CreateAgendaRequestDto;
+import com.gagaswin.silentmeeting.models.dtos.agenda.GetAgendaResponseDto;
+import com.gagaswin.silentmeeting.models.dtos.ideas.IdeaDto;
+import com.gagaswin.silentmeeting.models.dtos.votes.CountVoteResponseDto;
 import com.gagaswin.silentmeeting.models.entity.Agenda;
 import com.gagaswin.silentmeeting.models.entity.Meeting;
 import com.gagaswin.silentmeeting.models.entity.User;
@@ -10,6 +13,7 @@ import com.gagaswin.silentmeeting.repository.AgendaRepository;
 import com.gagaswin.silentmeeting.services.AgendaService;
 import com.gagaswin.silentmeeting.services.MeetingService;
 import com.gagaswin.silentmeeting.services.UserService;
+import com.gagaswin.silentmeeting.services.VoteService;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
 import org.springframework.security.core.Authentication;
@@ -24,9 +28,10 @@ public class AgendaServiceImpl implements AgendaService {
   private final AgendaRepository agendaRepository;
   private final UserService userService;
   private final MeetingService meetingService;
+  private final VoteService voteService;
 
   @Override
-  public Agenda getCurrentAgenda(String id) {
+  public Agenda findByIdOrThrow(String id) {
     return agendaRepository.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("Agenda", "Id", id));
   }
@@ -35,34 +40,34 @@ public class AgendaServiceImpl implements AgendaService {
   public AgendaResponseDto create(Authentication authentication,
                                   String meetingId,
                                   CreateAgendaRequestDto createAgendaRequestDto) throws BadRequestException {
-    User currentUser = userService.getCurrentUser(authentication);
-    Meeting currentMeeting = meetingService.getCurrentMeeting(meetingId);
+    User currentUser = userService.getUserAuth(authentication);
+    Meeting currentMeeting = meetingService.findByIdOrThrow(meetingId);
 
     if (!currentUser.getId().equals(currentMeeting.getUser().getId())) {
       throw new BadRequestException("You are not the host!");
     }
 
-    LocalDateTime currentTime = LocalDateTime.now();
     Agenda agenda = Agenda.builder()
         .title(createAgendaRequestDto.getTitle())
         .description(createAgendaRequestDto.getDescription())
-        .createdAt(currentTime)
+        .createdAt(LocalDateTime.now())
         .meeting(currentMeeting)
         .build();
-    agendaRepository.save(agenda);
+    Agenda saveAgenda = agendaRepository.save(agenda);
 
     return AgendaResponseDto.builder()
-        .title(createAgendaRequestDto.getTitle())
-        .description(createAgendaRequestDto.getDescription())
-        .createdAt(currentTime)
-        .meetingId(currentMeeting.getId())
+        .id(saveAgenda.getId())
+        .title(saveAgenda.getTitle())
+        .description(saveAgenda.getDescription())
+        .createdAt(saveAgenda.getCreatedAt())
+        .meetingId(saveAgenda.getMeeting().getId())
         .build();
   }
 
   @Override
-  public List<AgendaResponseDto> getAll(Authentication authentication, String meetingId) throws BadRequestException {
-    User currentUser = userService.getCurrentUser(authentication);
-    Meeting currentMeeting = meetingService.getCurrentMeeting(meetingId);
+  public List<GetAgendaResponseDto> getAll(Authentication authentication, String meetingId) throws BadRequestException {
+    User currentUser = userService.getUserAuth(authentication);
+    Meeting currentMeeting = meetingService.findByIdOrThrow(meetingId);
 
     boolean isCreator = currentMeeting.getUser().getId().equals(currentUser.getId());
     boolean isParticipant = currentMeeting.getParticipants().stream()
@@ -71,19 +76,24 @@ public class AgendaServiceImpl implements AgendaService {
     if (!isCreator && !isParticipant) throw new BadRequestException("User is not part of this meeting");
 
     return currentMeeting.getAgenda().stream()
-        .map(agenda -> AgendaResponseDto.builder()
-            .title(agenda.getTitle())
-            .description(agenda.getDescription())
-            .createdAt(agenda.getCreatedAt())
-            .meetingId(agenda.getMeeting().getId())
-            .build())
+        .map(agenda -> {
+          CountVoteResponseDto countVoteResponseDto = voteService.countVote(agenda);
+          return GetAgendaResponseDto.builder()
+              .id(agenda.getId())
+              .meetingId(agenda.getMeeting().getId())
+              .title(agenda.getTitle())
+              .description(agenda.getDescription())
+              .createdAt(agenda.getCreatedAt())
+              .votes(countVoteResponseDto)
+              .build();
+        })
         .toList();
   }
 
   @Override
-  public AgendaResponseDto get(Authentication authentication, String meetingId, String agendaId) throws BadRequestException {
-    User currentUser = userService.getCurrentUser(authentication);
-    Meeting currentMeeting = meetingService.getCurrentMeeting(meetingId);
+  public GetAgendaResponseDto get(Authentication authentication, String meetingId, String agendaId) throws BadRequestException {
+    User currentUser = userService.getUserAuth(authentication);
+    Meeting currentMeeting = meetingService.findByIdOrThrow(meetingId);
 
     boolean isCreator = currentMeeting.getUser().getId().equals(currentUser.getId());
     boolean isParticipant = currentMeeting.getParticipants().stream()
@@ -91,13 +101,26 @@ public class AgendaServiceImpl implements AgendaService {
 
     if (!isCreator && !isParticipant) throw new BadRequestException("User is not part of this meeting");
 
-    Agenda currentAgenda = this.getCurrentAgenda(agendaId);
+    Agenda currentAgenda = this.findByIdOrThrow(agendaId);
 
-    return AgendaResponseDto.builder()
+    CountVoteResponseDto countVoteResponseDto = voteService.countVote(currentAgenda);
+    List<IdeaDto> ideaDtos = currentAgenda.getIdeas().stream()
+        .map(ideas -> IdeaDto.builder()
+            .id(ideas.getId())
+            .content(ideas.getContent())
+            .participantId(ideas.getParticipant().getId())
+            .createdAt(ideas.getCreatedAt())
+            .build())
+        .toList();
+
+    return GetAgendaResponseDto.builder()
+        .id(currentAgenda.getId())
+        .meetingId(currentAgenda.getMeeting().getId())
         .title(currentAgenda.getTitle())
         .description(currentAgenda.getDescription())
         .createdAt(currentAgenda.getCreatedAt())
-        .meetingId(currentAgenda.getMeeting().getId())
+        .votes(countVoteResponseDto)
+        .ideas(ideaDtos)
         .build();
   }
 }

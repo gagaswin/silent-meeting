@@ -3,6 +3,7 @@ package com.gagaswin.silentmeeting.controllers;
 import com.gagaswin.silentmeeting.models.dtos.CommonResponseDto;
 import com.gagaswin.silentmeeting.models.dtos.agenda.AgendaResponseDto;
 import com.gagaswin.silentmeeting.models.dtos.agenda.CreateAgendaRequestDto;
+import com.gagaswin.silentmeeting.models.dtos.agenda.GetAgendaResponseDto;
 import com.gagaswin.silentmeeting.services.AgendaService;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
@@ -34,11 +35,11 @@ public class AgendaController {
   }
 
   @GetMapping
-  public ResponseEntity<CommonResponseDto<List<AgendaResponseDto>>> getAllAgenda(Authentication authentication,
-                                                                                 @PathVariable String meetingId) throws BadRequestException {
-    List<AgendaResponseDto> agendaResponseDtoList = agendaService.getAll(authentication, meetingId);
+  public ResponseEntity<CommonResponseDto<List<GetAgendaResponseDto>>> getAllAgenda(Authentication authentication,
+                                                                                    @PathVariable String meetingId) throws BadRequestException {
+    List<GetAgendaResponseDto> agendaResponseDtoList = agendaService.getAll(authentication, meetingId);
 
-    CommonResponseDto<List<AgendaResponseDto>> response = CommonResponseDto.<List<AgendaResponseDto>>builder()
+    CommonResponseDto<List<GetAgendaResponseDto>> response = CommonResponseDto.<List<GetAgendaResponseDto>>builder()
         .statusCode(HttpStatus.OK.value())
         .data(agendaResponseDtoList)
         .build();
@@ -47,12 +48,12 @@ public class AgendaController {
   }
 
   @GetMapping("/{agendaId}")
-  public ResponseEntity<CommonResponseDto<AgendaResponseDto>> getAgenda(Authentication authentication,
+  public ResponseEntity<CommonResponseDto<GetAgendaResponseDto>> getAgenda(Authentication authentication,
                                                                         @PathVariable String meetingId,
                                                                         @PathVariable String agendaId) throws BadRequestException {
-    AgendaResponseDto agendaResponseDto = agendaService.get(authentication, meetingId, agendaId);
+    GetAgendaResponseDto agendaResponseDto = agendaService.get(authentication, meetingId, agendaId);
 
-    CommonResponseDto<AgendaResponseDto> response = CommonResponseDto.<AgendaResponseDto>builder()
+    CommonResponseDto<GetAgendaResponseDto> response = CommonResponseDto.<GetAgendaResponseDto>builder()
         .statusCode(HttpStatus.OK.value())
         .data(agendaResponseDto)
         .build();

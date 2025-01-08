@@ -1,4 +1,4 @@
-package com.gagaswin.silentmeeting.models.dtos.agenda;
+package com.gagaswin.silentmeeting.models.dtos.ideas;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,10 +11,9 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AgendaResponseDto {
+public class IdeaDto {
   private String id;
-  private String title;
-  private String description;
+  private String content;
+  private String participantId;
   private LocalDateTime createdAt;
-  private String meetingId;
 }

@@ -6,13 +6,15 @@ import com.gagaswin.silentmeeting.models.dtos.meetings.CreateMeetingRequestDto;
 import com.gagaswin.silentmeeting.models.dtos.meetings.CreateMeetingResponseDto;
 import com.gagaswin.silentmeeting.models.dtos.meetings.MeetingResponseDto;
 import com.gagaswin.silentmeeting.models.dtos.participants.ParticipantDto;
+import com.gagaswin.silentmeeting.models.dtos.votes.CountVoteResponseDto;
 import com.gagaswin.silentmeeting.models.entity.Agenda;
 import com.gagaswin.silentmeeting.models.entity.Meeting;
 import com.gagaswin.silentmeeting.models.entity.User;
-import com.gagaswin.silentmeeting.repository.AgendaRepository;
 import com.gagaswin.silentmeeting.repository.MeetingRepository;
 import com.gagaswin.silentmeeting.services.MeetingService;
 import com.gagaswin.silentmeeting.services.UserService;
+import com.gagaswin.silentmeeting.services.VoteService;
+import com.gagaswin.silentmeeting.services.data.AgendaDataService;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.coyote.BadRequestException;
@@ -27,20 +29,21 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class MeetingServiceImpl implements MeetingService {
-  private final UserService userService;
   private final MeetingRepository meetingRepository;
-  private final AgendaRepository agendaRepository;
+  private final UserService userService;
+  private final AgendaDataService agendaDataService;
+  private final VoteService voteService;
   private final PasswordEncoder passwordEncoder;
 
   @Override
-  public Meeting getCurrentMeeting(String id) {
+  public Meeting findByIdOrThrow(String id) {
     return meetingRepository.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("Meeting", "Id", id));
   }
 
   @Override
   public CreateMeetingResponseDto create(Authentication authentication, CreateMeetingRequestDto createMeetingRequestDto) {
-    User currentUser = userService.getCurrentUser(authentication);
+    User currentUser = userService.getUserAuth(authentication);
 
     String generateRandomPassword = RandomStringUtils
         .random(12, 48, 122, true, true, null, new SecureRandom());
@@ -64,7 +67,7 @@ public class MeetingServiceImpl implements MeetingService {
           .createdAt(LocalDateTime.now())
           .meeting(meeting)
           .build();
-      agendaRepository.save(saveAgenda);
+      agendaDataService.save(saveAgenda);
     }
 
     return CreateMeetingResponseDto.builder()
@@ -76,8 +79,8 @@ public class MeetingServiceImpl implements MeetingService {
 
   @Override
   public MeetingResponseDto get(Authentication authentication, String meetingId) throws BadRequestException {
-    User currentUser = userService.getCurrentUser(authentication);
-    Meeting currentMeeting = this.getCurrentMeeting(meetingId);
+    User currentUser = userService.getUserAuth(authentication);
+    Meeting currentMeeting = this.findByIdOrThrow(meetingId);
 
     boolean isCreator = currentMeeting.getUser().getId().equals(currentUser.getId());
     boolean isParticipant = currentMeeting.getParticipants().stream()
@@ -96,12 +99,16 @@ public class MeetingServiceImpl implements MeetingService {
         .toList();
 
     List<AgendaDto> agendaDtos = currentMeeting.getAgenda().stream()
-        .map(agenda -> AgendaDto.builder()
-            .id(agenda.getId())
-            .title(agenda.getTitle())
-            .description(agenda.getDescription())
-            .createdAt(agenda.getCreatedAt())
-            .build())
+        .map(agenda -> {
+          CountVoteResponseDto countVoteResponseDto = voteService.countVote(agenda);
+          return AgendaDto.builder()
+              .id(agenda.getId())
+              .title(agenda.getTitle())
+              .description(agenda.getDescription())
+              .createdAt(agenda.getCreatedAt())
+              .votes(countVoteResponseDto)
+              .build();
+        })
         .toList();
 
     MeetingResponseDto.MeetingResponseDtoBuilder responseDto = MeetingResponseDto.builder()
