@@ -4,8 +4,8 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gagaswin.silentmeeting.models.dtos.CommonResponseDto;
+import com.gagaswin.silentmeeting.services.CustomUserDetailsService;
 import com.gagaswin.silentmeeting.utils.JwtUtil;
-import com.gagaswin.silentmeeting.services.UserService;
 import com.gagaswin.silentmeeting.utils.ResponseUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -28,7 +28,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
   private final JwtUtil jwtUtil;
-  private final UserService userService;
+  private final CustomUserDetailsService customUserDetailsService;
 
   @Override
   protected void doFilterInternal(@NonNull HttpServletRequest request,
@@ -45,7 +45,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         jwtUtil.verifyJwt(token, userId, username);
 
-        UserDetails userDetails = userService.loadUserByUsername(username);
+        UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
 
         UsernamePasswordAuthenticationToken authenticationToken =
             new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());

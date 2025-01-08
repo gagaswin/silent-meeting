@@ -1,4 +1,4 @@
-package com.gagaswin.silentmeeting.models.dtos.participants;
+package com.gagaswin.silentmeeting.models.dtos.votes;
 
 import com.gagaswin.silentmeeting.enums.EParticipantVote;
 import lombok.AllArgsConstructor;

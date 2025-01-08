@@ -2,10 +2,10 @@ package com.gagaswin.silentmeeting.services;
 
 import com.gagaswin.silentmeeting.models.dtos.ideas.CreateIdeaRequestDto;
 import com.gagaswin.silentmeeting.models.dtos.ideas.IdeaResponseDto;
-import com.gagaswin.silentmeeting.models.dtos.participants.CreateVoteRequestDto;
+import com.gagaswin.silentmeeting.models.dtos.votes.CreateVoteRequestDto;
 import com.gagaswin.silentmeeting.models.dtos.participants.JoinMeetingRequestDto;
 import com.gagaswin.silentmeeting.models.dtos.participants.JoinMeetingResponseDto;
-import com.gagaswin.silentmeeting.models.dtos.participants.VoteResponseDto;
+import com.gagaswin.silentmeeting.models.dtos.votes.VoteResponseDto;
 import com.gagaswin.silentmeeting.models.entity.Meeting;
 import com.gagaswin.silentmeeting.models.entity.Participant;
 import com.gagaswin.silentmeeting.models.entity.User;

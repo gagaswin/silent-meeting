@@ -1,53 +1,50 @@
 package com.gagaswin.silentmeeting.services.impl;
 
 import com.gagaswin.silentmeeting.exceptions.ResourceNotFoundException;
-import com.gagaswin.silentmeeting.models.entity.AppUser;
 import com.gagaswin.silentmeeting.models.entity.User;
 import com.gagaswin.silentmeeting.models.entity.UserDetail;
 import com.gagaswin.silentmeeting.models.dtos.users.UpdateUserProfileRequestDto;
 import com.gagaswin.silentmeeting.models.dtos.users.UpdateUserProfileResponseDto;
 import com.gagaswin.silentmeeting.models.dtos.users.UserResponseDto;
-import com.gagaswin.silentmeeting.repository.UserDetailRepository;
 import com.gagaswin.silentmeeting.repository.UserRepository;
+import com.gagaswin.silentmeeting.services.UserDetailService;
 import com.gagaswin.silentmeeting.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.beans.FeatureDescriptor;
 import java.beans.PropertyDescriptor;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
   private final UserRepository userRepository;
-  private final UserDetailRepository userDetailRepository;
+  private final UserDetailService userDetailService;
 
   @Override
-  public UserDetails loadUserByUsername(String username) {
-    User user = userRepository.findByUsername(username)
-        .orElseThrow(() -> new UsernameNotFoundException("User not found: org.springframework.security.core.userdetails.UsernameNotFoundException"));
-    return AppUser.builder()
-        .id(user.getId())
-        .username(user.getUsername())
-        .password(user.getPassword())
-        .build();
+  public Optional<User> getByUsername(String username) {
+    return userRepository.findByUsername(username);
   }
 
   @Override
-  public User getCurrentUser(Authentication authentication) {
+  public void save(User user) {
+    userRepository.save(user);
+  }
+
+  @Override
+  public User getUserAuth(Authentication authentication) {
     return userRepository.findByUsername(authentication.getName())
         .orElseThrow(() -> new ResourceNotFoundException("User", "Username", authentication.getName()));
   }
 
   @Override
   public UserResponseDto getProfile(Authentication authentication) {
-    User currentUser = getCurrentUser(authentication);
+    User currentUser = this.getUserAuth(authentication);
 
     UserDetail userDetail = currentUser.getUserDetail();
 
@@ -86,11 +83,11 @@ public class UserServiceImpl implements UserService {
   @Override
   public UpdateUserProfileResponseDto updateProfile(Authentication authentication,
                                                     UpdateUserProfileRequestDto updateUserProfileRequestDto) {
-    User currentUser = getCurrentUser(authentication);
+    User currentUser = this.getUserAuth(authentication);
     UserDetail userDetail = currentUser.getUserDetail();
 
     BeanUtils.copyProperties(updateUserProfileRequestDto, userDetail, getNullPropertyName(updateUserProfileRequestDto));
-    UserDetail updatedUserDetail = userDetailRepository.saveAndFlush(userDetail);
+    UserDetail updatedUserDetail = userDetailService.save(userDetail);
 
     LocalDateTime currentUpdate = LocalDateTime.now();
     currentUser.setUpdatedAt(LocalDateTime.now());
