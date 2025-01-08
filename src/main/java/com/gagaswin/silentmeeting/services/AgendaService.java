@@ -10,7 +10,7 @@ import org.springframework.security.core.Authentication;
 import java.util.List;
 
 public interface AgendaService {
-  Agenda getById(String id);
+  Agenda findByIdOrThrow(String id);
 
   AgendaResponseDto create(Authentication authentication,
                            String meetingId,

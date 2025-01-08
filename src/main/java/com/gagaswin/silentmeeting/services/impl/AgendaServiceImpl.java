@@ -31,7 +31,7 @@ public class AgendaServiceImpl implements AgendaService {
   private final VoteService voteService;
 
   @Override
-  public Agenda getById(String id) {
+  public Agenda findByIdOrThrow(String id) {
     return agendaRepository.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("Agenda", "Id", id));
   }
@@ -41,7 +41,7 @@ public class AgendaServiceImpl implements AgendaService {
                                   String meetingId,
                                   CreateAgendaRequestDto createAgendaRequestDto) throws BadRequestException {
     User currentUser = userService.getUserAuth(authentication);
-    Meeting currentMeeting = meetingService.getById(meetingId);
+    Meeting currentMeeting = meetingService.findByIdOrThrow(meetingId);
 
     if (!currentUser.getId().equals(currentMeeting.getUser().getId())) {
       throw new BadRequestException("You are not the host!");
@@ -67,7 +67,7 @@ public class AgendaServiceImpl implements AgendaService {
   @Override
   public List<GetAgendaResponseDto> getAll(Authentication authentication, String meetingId) throws BadRequestException {
     User currentUser = userService.getUserAuth(authentication);
-    Meeting currentMeeting = meetingService.getById(meetingId);
+    Meeting currentMeeting = meetingService.findByIdOrThrow(meetingId);
 
     boolean isCreator = currentMeeting.getUser().getId().equals(currentUser.getId());
     boolean isParticipant = currentMeeting.getParticipants().stream()
@@ -93,7 +93,7 @@ public class AgendaServiceImpl implements AgendaService {
   @Override
   public GetAgendaResponseDto get(Authentication authentication, String meetingId, String agendaId) throws BadRequestException {
     User currentUser = userService.getUserAuth(authentication);
-    Meeting currentMeeting = meetingService.getById(meetingId);
+    Meeting currentMeeting = meetingService.findByIdOrThrow(meetingId);
 
     boolean isCreator = currentMeeting.getUser().getId().equals(currentUser.getId());
     boolean isParticipant = currentMeeting.getParticipants().stream()
@@ -101,7 +101,7 @@ public class AgendaServiceImpl implements AgendaService {
 
     if (!isCreator && !isParticipant) throw new BadRequestException("User is not part of this meeting");
 
-    Agenda currentAgenda = this.getById(agendaId);
+    Agenda currentAgenda = this.findByIdOrThrow(agendaId);
 
     CountVoteResponseDto countVoteResponseDto = voteService.countVote(currentAgenda);
     List<IdeaDto> ideaDtos = currentAgenda.getIdeas().stream()

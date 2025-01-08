@@ -1,8 +1,8 @@
-package com.gagaswin.silentmeeting.services.impl;
+package com.gagaswin.silentmeeting.services.data.impl;
 
 import com.gagaswin.silentmeeting.models.entity.UserDetail;
 import com.gagaswin.silentmeeting.repository.UserDetailRepository;
-import com.gagaswin.silentmeeting.services.UserDetailService;
+import com.gagaswin.silentmeeting.services.data.UserDetailDataService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -10,7 +10,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class UserDetailServiceImpl implements UserDetailService {
+public class UserDetailDataServiceImpl implements UserDetailDataService {
   private final UserDetailRepository userDetailRepository;
 
   @Override
@@ -19,7 +19,7 @@ public class UserDetailServiceImpl implements UserDetailService {
   }
 
   @Override
-  public Optional<UserDetail> getByEmail(String email) {
+  public Optional<UserDetail> findByEmail(String email) {
     return userDetailRepository.findByEmail(email);
   }
 }

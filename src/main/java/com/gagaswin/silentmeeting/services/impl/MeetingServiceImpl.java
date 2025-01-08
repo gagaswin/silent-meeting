@@ -10,11 +10,11 @@ import com.gagaswin.silentmeeting.models.dtos.votes.CountVoteResponseDto;
 import com.gagaswin.silentmeeting.models.entity.Agenda;
 import com.gagaswin.silentmeeting.models.entity.Meeting;
 import com.gagaswin.silentmeeting.models.entity.User;
-import com.gagaswin.silentmeeting.repository.AgendaRepository;
 import com.gagaswin.silentmeeting.repository.MeetingRepository;
 import com.gagaswin.silentmeeting.services.MeetingService;
 import com.gagaswin.silentmeeting.services.UserService;
 import com.gagaswin.silentmeeting.services.VoteService;
+import com.gagaswin.silentmeeting.services.data.AgendaDataService;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.coyote.BadRequestException;
@@ -31,12 +31,12 @@ import java.util.List;
 public class MeetingServiceImpl implements MeetingService {
   private final MeetingRepository meetingRepository;
   private final UserService userService;
-  private final AgendaRepository agendaRepository;
+  private final AgendaDataService agendaDataService;
   private final VoteService voteService;
   private final PasswordEncoder passwordEncoder;
 
   @Override
-  public Meeting getById(String id) {
+  public Meeting findByIdOrThrow(String id) {
     return meetingRepository.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("Meeting", "Id", id));
   }
@@ -67,7 +67,7 @@ public class MeetingServiceImpl implements MeetingService {
           .createdAt(LocalDateTime.now())
           .meeting(meeting)
           .build();
-      agendaRepository.save(saveAgenda);
+      agendaDataService.save(saveAgenda);
     }
 
     return CreateMeetingResponseDto.builder()
@@ -80,7 +80,7 @@ public class MeetingServiceImpl implements MeetingService {
   @Override
   public MeetingResponseDto get(Authentication authentication, String meetingId) throws BadRequestException {
     User currentUser = userService.getUserAuth(authentication);
-    Meeting currentMeeting = this.getById(meetingId);
+    Meeting currentMeeting = this.findByIdOrThrow(meetingId);
 
     boolean isCreator = currentMeeting.getUser().getId().equals(currentUser.getId());
     boolean isParticipant = currentMeeting.getParticipants().stream()

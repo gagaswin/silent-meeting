@@ -3,8 +3,8 @@ package com.gagaswin.silentmeeting.services.impl;
 import com.gagaswin.silentmeeting.exceptions.InvalidRefreshTokenException;
 import com.gagaswin.silentmeeting.exceptions.UserAlreadyExistsException;
 import com.gagaswin.silentmeeting.services.AuthService;
-import com.gagaswin.silentmeeting.services.UserDetailService;
-import com.gagaswin.silentmeeting.services.UserService;
+import com.gagaswin.silentmeeting.services.data.UserDataService;
+import com.gagaswin.silentmeeting.services.data.UserDetailDataService;
 import com.gagaswin.silentmeeting.utils.JwtUtil;
 import com.gagaswin.silentmeeting.models.entity.AuthJwtRefresh;
 import com.gagaswin.silentmeeting.models.dtos.auth.LoginUserRequestDto;
@@ -32,19 +32,19 @@ import java.util.Date;
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
   private final AuthJwtRefreshRepository authJwtRefreshRepository;
-  private final UserService userService;
-  private final UserDetailService userDetailService;
+  private final UserDataService userDataService;
+  private final UserDetailDataService userDetailDataService;
   private final PasswordEncoder passwordEncoder;
   private final AuthenticationManager authenticationManager;
   private final JwtUtil jwtUtil;
 
   @Override
   public AuthResponseDto register(RegisterUserRequestDto registerUserRequestDto) {
-    if (userService.getByUsername(registerUserRequestDto.getUsername()).isPresent()) {
+    if (userDataService.findByUsername(registerUserRequestDto.getUsername()).isPresent()) {
       throw new UserAlreadyExistsException("Username", registerUserRequestDto.getUsername());
     }
 
-    if (userDetailService.getByEmail(registerUserRequestDto.getEmail()).isPresent()) {
+    if (userDetailDataService.findByEmail(registerUserRequestDto.getEmail()).isPresent()) {
       throw new UserAlreadyExistsException("Email", registerUserRequestDto.getEmail());
     }
 
@@ -70,7 +70,7 @@ public class AuthServiceImpl implements AuthService {
 
     userDetail.setUser(user);
 
-    userService.save(user);
+    userDataService.save(user);
 
     LoginUserRequestDto loginUserRequestDto = new LoginUserRequestDto(
         registerUserRequestDto.getUsername(),
@@ -92,7 +92,7 @@ public class AuthServiceImpl implements AuthService {
 
     AppUser appUser = (AppUser) authentication.getPrincipal();
 
-    User user = userService.getByUsername(appUser.getUsername())
+    User user = userDataService.findByUsername(appUser.getUsername())
         .orElseThrow(() -> new UsernameNotFoundException("User not found: org.springframework.security.core.userdetails.UsernameNotFoundException"));
 
     String accessToken = jwtUtil.generateToken(appUser);
